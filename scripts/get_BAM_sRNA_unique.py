@@ -29,33 +29,33 @@ if args.sra2name != None:
 samfile = pysam.AlignmentFile(args.bamfile, "rb")
 iter = samfile.fetch()
 
-lengths = {}
 n=0
 names = {}
+sRNA  = {}
 for read in iter:
     (srr,readid) = read.qname.split(".")
     if srr not in names:
         names[srr] = 0
-#    print(read.qname,read.query_alignment_length,len(read.query_sequence))
-#    print(read.query_alignment_start)
-#    print(read.query_sequence)
-#    print(read.query_alignment_sequence)
-    if read.query_alignment_length not in lengths:
-        lengths[read.query_alignment_length] = {srr: 0}
-    elif srr not in lengths[read.query_alignment_length]:
-        lengths[read.query_alignment_length][srr] = 0
-    lengths[read.query_alignment_length][srr] += 1
+    seqlen = len(read.query_alignment_sequence)
+    if  seqlen > args.maxsize or seqlen < args.minsize:
+        continue
+
+    if read.query_alignment_sequence not in sRNA:
+        sRNA[read.query_alignment_sequence] = {srr: 0}
+    elif srr not in sRNA[read.query_alignment_sequence]:
+        sRNA[read.query_alignment_sequence][srr] = 0
+    sRNA[read.query_alignment_sequence][srr] += 1
+
     names[srr] += 1
     if (args.maxrecords > 0) and (n > args.maxrecords):
         break
     n += 1
 
-with open("{}.read_lengths_counts.tsv".format(outname),"w") as outfh, open("{}.read_lengths_percent.tsv".format(outname),"w") as outpfh:
+with open("{}.reads.tsv".format(outname),"w") as outfh:
     outtsv=csv.writer(outfh,delimiter="\t")
-    outtsvP=csv.writer(outpfh,delimiter="\t")
 
     srrorder = sorted(names.keys())
-    header   = []
+    header   = ['SEQ','LENGTH','TOTAL_COUNT']
     #  replace SRR with names if we gave a tab files of SRR to name
     if len(sra2name) > 0:
         for n in sorted(srrorder,key=lambda x: sra2name[x] if x in sra2name else x):
@@ -64,21 +64,18 @@ with open("{}.read_lengths_counts.tsv".format(outname),"w") as outfh, open("{}.r
             else:
                 header.append(n)
     else:
-        header = srrorder
-    header.insert(0,"SIZE")
+        header.extend(srrorder)
     outtsv.writerow(header)
-    outtsvP.writerow(header)
-    for size in sorted(lengths):
-        if size > args.maxsize or size < args.minsize:
-            continue
-        row = [size]
-        rowP = [size]
+
+    table = []
+    for seq in sRNA:
+        row = [seq, len(seq), sum(sRNA[seq].values()) ]
         for n in srrorder:
-            if n in lengths[size]:
-                row.append(lengths[size][n])
-                rowP.append("%.2f"%( 100*lengths[size][n] / names[n]))
+            if n in sRNA[seq]:
+                row.append(sRNA[seq][n])
             else:
                 row.append(0)
-                rowP.append("%.2f"%(0))
+        table.append(row)
+
+    for row in sorted(table,key=lambda x: x[2],reverse=True):
         outtsv.writerow(row)
-        outtsvP.writerow(rowP)
