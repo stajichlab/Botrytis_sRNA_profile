@@ -52,7 +52,7 @@ with gzip.open(args.botrytis, "r") as bc,  gzip.open(args.tomato, "r") as sl, gz
     id2size = {}
     for row in bcreader:
         name = row[3]
-        if args.skipsingle and int(row[6]) <= 1:
+        if args.skipsingle and int(row[6]) <= 2:
             continue
         if name not in slhits:
             bcwriter.writerow(row)
@@ -65,32 +65,21 @@ genomefeatures = BedTool(args.featurefile)
 sRNA           = BedTool(outsavebed)
 
 # this would only be reads that overlap we need to also consider those which do not overlap
-readsInFeatures = sRNA.intersect(genomefeatures,wo=True)
+readsInFeatures = sRNA.intersect(genomefeatures,wao=True)
 sizeprofile = {}
 sizeprofileuniq = {}
 types = set()
 for i in readsInFeatures:
     seq  = i[3]
-    type = i[6]
 
     len    = id2size[seq]['length']
     unique = id2size[seq]['unique']
     ct     = id2size[seq]['count']
-    if type == "exon" or type == "tRNA":
-        types.add(type)
-        if len not in sizeprofile:
-            sizeprofile[len] = {type: ct}
-        elif type not in sizeprofile[len]:
-            sizeprofile[len][type] = ct
-        else:
-            sizeprofile[len][type] += ct
-        if unique == 1:
-            if len not in sizeprofileuniq:
-                sizeprofileuniq[len] = {type: ct}
-            elif type not in sizeprofile[len]:
-                sizeprofileuniq[len][type] = ct
-            else:
-                sizeprofileuniq[len][type] += ct
+
+    type = i[6]
+    TypeClass = "None"
+    if type == "exon" or type == "tRNA" or type == "intron":
+        TypeClass = type
     elif type == 'match': # this is how we coded RepeatMasker results
         grpcol  = i[12]
         grp = {}
@@ -98,22 +87,28 @@ for i in readsInFeatures:
             (key,val) = nm.split("=")
             v = val.split('/')[0]
             grp[key] = "TE.{}".format(v)
-        types.add(grp['type'])
-        if len not in sizeprofile:
-            sizeprofile[len] = {grp["type"]: ct}
-        elif grp["type"] not in sizeprofile[len]:
-            sizeprofile[len][ grp["type"] ]= ct
+        TypeClass = grp['type'] 
+    elif type == ".":
+        TypeClass = "None"
+    else:
+        continue
+    
+    types.add(TypeClass)
+    if len not in sizeprofile:
+        sizeprofile[len] = {TypeClass: ct}
+    elif TypeClass not in sizeprofile[len]:
+        sizeprofile[len][TypeClass] = ct
+    else:
+        sizeprofile[len][TypeClass] += ct
+        
+    if unique == 1:
+        if len not in sizeprofileuniq:
+            sizeprofileuniq[len] = {TypeClass: ct}
+        elif TypeClass not in sizeprofileuniq[len]:
+            sizeprofileuniq[len][TypeClass] = ct
         else:
-            sizeprofile[len][ grp["type"] ]+= ct
-
-        # keep track of unique matchers too
-        if unique == 1:
-            if len not in sizeprofileuniq:
-                sizeprofileuniq[len] = {grp["type"]: ct}
-            elif grp["type"] not in sizeprofileuniq[len]:
-                sizeprofileuniq[len][ grp["type"] ]= ct
-            else:
-                sizeprofileuniq[len][ grp["type"] ] += ct
+            sizeprofileuniq[len][TypeClass] += ct
+    
 ctheader = ['SIZE']
 ctheader.extend(sorted(list(types)))
 ctheader.append("TOTAL")
@@ -150,4 +145,3 @@ with open(os.path.join(args.outdir,"Botrytis_size_profile_uniq.tsv"),"w") as ofh
             sum += ct
         row.append(sum)
         bcwriter.writerow(row)
-    
