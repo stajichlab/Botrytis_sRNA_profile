@@ -130,7 +130,7 @@ types = set()
 for i in readsInFeaturesF:
     seq = i[3]
     strand = i[4]
-    print(i)
+    logging.debug(i)
     read_feature_direction = 'sense'
     if strand == "-":
         read_feature_direction = 'antisense'
@@ -194,9 +194,9 @@ readsInFeaturesR = sRNAR.intersect(genomefeatures, wao=True)
 logging.debug("Processing rev strand features")
 
 for i in readsInFeaturesR:
-    seq = i[3]
-    strand = i[4]
-    print(i)
+    seq = i[4]
+    strand = i[3]
+    logging.debug(i)
     read_feature_direction = 'sense'
     if strand == "+":
         read_feature_direction = 'antisense'
