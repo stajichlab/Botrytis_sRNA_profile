@@ -12,5 +12,4 @@ if [ -z $N ]; then
 fi
 BAMFILE=$(ls results/*.bam | sed -n ${N}p)
 
-time ./scripts/get_BAM_sRNA_unique.py -b $BAMFILE --sra2name sra2name.tsv 
-
+time ./scripts/get_BAM_sRNA_unique.py -b $BAMFILE --sra2name sra2name.tsv

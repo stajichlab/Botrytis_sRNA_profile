@@ -1,20 +1,24 @@
 #!/usr/bin/env python3
-import csv, os, sys, re
-import io
-import gzip
-import argparse
-import pysam
+"""Count BAM reads and score direction separating reads by the library.
 
-#from sqlitedict import SqliteDict
-#import tempfile
+Reads are assigned to library by SRA name. Only count unique names.
+"""
+import argparse
+import csv
+import gzip
+import io
+import os
+import re
+
+import pysam
 
 parser = argparse.ArgumentParser(
     description='Get sRNA size distribution and info')
 
 parser.add_argument('-b', '--bamfile', required=True, help='bamfile for input')
 parser.add_argument('-o', '--out', required=False, help='outfile base name')
-parser.add_argument('-v','--debug',default=False,required=False,help='debugging flag')
-parser.add_argument('--maxrecords', required=False,default=-1, type=int,
+parser.add_argument('-v', '--debug', default=False, action=argparse.BooleanOptionalAction, help='debugging flag')
+parser.add_argument('--maxrecords', required=False, default=-1, type=int,
                     help='maximum number of records to process')
 # add min coverag
 parser.add_argument('--tempdir', required=False, default='/scratch', help='scratch folder')
@@ -23,21 +27,21 @@ parser.add_argument('--minsize', required=False, default=18, help='min read size
 parser.add_argument('--sra2name', required=False, type=argparse.FileType('r'),
                     help='map of sranames to experiment names')
 args = parser.parse_args()
-outname=""
-if args.out == None:
-    outname=os.path.splitext(args.bamfile)[0]
+outname = ""
+if args.out is None:
+    outname = os.path.splitext(args.bamfile)[0]
 else:
-    outname=args.out
+    outname = args.out
 
 sra2name = {}
-if args.sra2name != None:
-    csvin = csv.reader(args.sra2name,delimiter="\t")
+if args.sra2name is not None:
+    csvin = csv.reader(args.sra2name, delimiter="\t")
     for r in csvin:
         sra2name[r[0]] = r[1]
 samfile = pysam.AlignmentFile(args.bamfile, "rb")
 iter = samfile.fetch()
 
-n=0
+n = 0
 librarynames = {}
 perfectmatch = re.compile(r'^(\d+)M$')
 sRNA = {}
@@ -45,12 +49,12 @@ sRNAInfo = {}
 sRNABlackList = set()
 
 for read in iter:
-    (srr,readid) = read.qname.split(".")
+    (srr, readid) = read.qname.split(".")
     if srr not in librarynames:
         librarynames[srr] = 0
     seqlen = len(read.query_alignment_sequence)
-    m=perfectmatch.match(read.cigarstring)
-    if  seqlen > args.maxsize or seqlen < args.minsize or not m:
+    m = perfectmatch.match(read.cigarstring)
+    if seqlen > args.maxsize or seqlen < args.minsize or not m:
         #      print("skipping {} as it isn't a perfect match ({})".format(read.query_alignment_sequence,read.cigarstring))
         continue
     if read.query_alignment_sequence not in sRNA:
@@ -63,10 +67,10 @@ for read in iter:
         strand = "+"
         if read.is_reverse:
             strand = '-'
-        sRNAInfo[read.query_alignment_sequence] = { 'ref': read.reference_id,
-                                                    'start'         : read.reference_start,
-                                                    'end'           : read.reference_end,
-                                                    'strand'        : strand}
+        sRNAInfo[read.query_alignment_sequence] = {'ref': read.reference_id,
+                                                   'start': read.reference_start,
+                                                   'end': read.reference_end,
+                                                   'strand': strand}
     elif sRNAInfo[read.query_alignment_sequence]['ref'] != read.reference_id or sRNAInfo[read.query_alignment_sequence]['start'] != read.reference_start:
         sRNABlackList.add(read.query_alignment_sequence)
 
@@ -74,18 +78,18 @@ for read in iter:
     if (args.maxrecords > 0) and (n > args.maxrecords):
         break
     n += 1
-    if (n % 10**6) == 0: # counter
-        print("Processed {} records".format(n))
+    if (n % 10**6) == 0:  # counter
+        print(f"Processed {n} records")
 
 skipcount = 0
-with gzip.open("{}.reads.tsv.gz".format(outname),"w") as outfh:
-    outtsv=csv.writer(io.TextIOWrapper(outfh,newline="", write_through=True),delimiter="\t")
+with gzip.open(f"{outname}.reads.tsv.gz", "w") as outfh:
+    outtsv = csv.writer(io.TextIOWrapper(outfh, newline="", write_through=True), delimiter="\t")
 
     srrorder = sorted(librarynames.keys())
-    header   = ['CHROM','START','END','STRAND','SEQ','LENGTH','UNIQUE','TOTAL_COUNT']
+    header = ['CHROM', 'START', 'END', 'STRAND', 'SEQ', 'LENGTH', 'UNIQUE', 'TOTAL_COUNT']
     #  replace SRR with names if we gave a tab files of SRR to name
     if len(sra2name) > 0:
-        for n in sorted(srrorder,key=lambda x: sra2name[x] if x in sra2name else x):
+        for n in sorted(srrorder, key=lambda x: sra2name[x] if x in sra2name else x):
             if n in sra2name:
                 header.append(sra2name[n])
             else:
@@ -98,10 +102,10 @@ with gzip.open("{}.reads.tsv.gz".format(outname),"w") as outfh:
     for seq in sRNA:
         unique = 1
         if seq in sRNABlackList:
-            skipcount +=1
+            skipcount += 1
             unique = 0
         row = [samfile.get_reference_name(sRNAInfo[seq]['ref']),
-               sRNAInfo[seq]['start'],sRNAInfo[seq]['end'], sRNAInfo[seq]['strand'], seq, len(seq),unique,sum(sRNA[seq].values()) ]
+               sRNAInfo[seq]['start'], sRNAInfo[seq]['end'], sRNAInfo[seq]['strand'], seq, len(seq), unique, sum(sRNA[seq].values())]
         for n in srrorder:
             if n in sRNA[seq]:
                 row.append(sRNA[seq][n])
@@ -109,7 +113,7 @@ with gzip.open("{}.reads.tsv.gz".format(outname),"w") as outfh:
                 row.append(0)
         table.append(row)
 
-    for row in sorted(table,key=lambda x: x[2],reverse=True):
+    for row in sorted(table, key=lambda x: x[2], reverse=True):
         outtsv.writerow(row)
 
-print("There were {} reads that did not have a unique mapping location".format(skipcount))
+print(f"There were {skipcount} reads that did not have a unique mapping location")

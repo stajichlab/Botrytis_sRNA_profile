@@ -9,11 +9,11 @@ sRNA_To <- vroom("results/Tomato_matchAligned.out.reads.tsv.gz") %>% filter(LENG
 write_tsv(sRNA_To %>% filter(TOTAL_COUNT > 500),"results/Tomato_matchAligned.min500.tsv.gz")
 
 sRNA_To_mockAdj <- sRNA_To %>% mutate(SumMockTo = M12As+M16As+M24As,
-                                      SumBcOnly = B16As+B16Bs, 
+                                      SumBcOnly = B16As+B16Bs,
                                       SumInfx  = I12As+I12Bs+I12Cs+I16As+I16Bs+I16Cs+I24Bs+I24Ds)
 
-TomNoBcInBcOnly <- sRNA_To_mockAdj %>% 
-    filter( SumBcOnly <= 10 & SumMockTo > 0) %>% 
+TomNoBcInBcOnly <- sRNA_To_mockAdj %>%
+    filter( SumBcOnly <= 10 & SumMockTo > 0) %>%
     arrange(desc(TOTAL_COUNT))
 
 write_tsv(TomNoBcInBcOnly %>% filter(TOTAL_COUNT > 100),"results/Tomato_matchAligned.mockBcFilter.min100.tsv.gz")

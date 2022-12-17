@@ -4,4 +4,3 @@
 module load fastp
 module load parallel
 parallel -j 4 fastp -i {} -o trimmed/{/.}.gz -w 6 -p ::: $(ls input/*.gz)
-

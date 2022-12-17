@@ -1,5 +1,5 @@
 #!/usr/bin/bash -l
-#SBATCH -p short -N 1 -n 1 -c 128 --mem 64gb 
+#SBATCH -p short -N 1 -n 1 -c 128 --mem 64gb
 
 module load RepeatMasker
 CPU=64
