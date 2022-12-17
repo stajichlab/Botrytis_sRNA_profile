@@ -1,0 +1,2 @@
+BioSample,SRA_Run,SRA_SampID,collection_date,geo_loc_name,host,isolate,sample_type,tissue
+SAMN10245969,SRR8074939,SRS3949148,2014-10,Netherlands:Wageningen,Solanum lycopersicum,B05.10,mixed culture,leaf

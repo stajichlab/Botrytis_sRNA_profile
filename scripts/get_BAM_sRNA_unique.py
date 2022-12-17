@@ -60,9 +60,13 @@ for read in iter:
 
     sRNA[read.query_alignment_sequence][srr] += 1
     if read.query_alignment_sequence not in sRNAInfo:
+        strand = "+"
+        if read.is_reverse:
+            strand = '-'
         sRNAInfo[read.query_alignment_sequence] = { 'ref': read.reference_id,
                                                     'start'         : read.reference_start,
-                                                    'end'           : read.reference_end }
+                                                    'end'           : read.reference_end,
+                                                    'strand'        : strand}
     elif sRNAInfo[read.query_alignment_sequence]['ref'] != read.reference_id or sRNAInfo[read.query_alignment_sequence]['start'] != read.reference_start:
         sRNABlackList.add(read.query_alignment_sequence)
 
@@ -78,7 +82,7 @@ with gzip.open("{}.reads.tsv.gz".format(outname),"w") as outfh:
     outtsv=csv.writer(io.TextIOWrapper(outfh,newline="", write_through=True),delimiter="\t")
 
     srrorder = sorted(librarynames.keys())
-    header   = ['CHROM','START','END','SEQ','LENGTH','UNIQUE','TOTAL_COUNT']
+    header   = ['CHROM','START','END','STRAND','SEQ','LENGTH','UNIQUE','TOTAL_COUNT']
     #  replace SRR with names if we gave a tab files of SRR to name
     if len(sra2name) > 0:
         for n in sorted(srrorder,key=lambda x: sra2name[x] if x in sra2name else x):
@@ -97,7 +101,7 @@ with gzip.open("{}.reads.tsv.gz".format(outname),"w") as outfh:
             skipcount +=1
             unique = 0
         row = [samfile.get_reference_name(sRNAInfo[seq]['ref']),
-               sRNAInfo[seq]['start'],sRNAInfo[seq]['end'],seq, len(seq),unique,sum(sRNA[seq].values()) ]
+               sRNAInfo[seq]['start'],sRNAInfo[seq]['end'], sRNAInfo[seq]['strand'], seq, len(seq),unique,sum(sRNA[seq].values()) ]
         for n in srrorder:
             if n in sRNA[seq]:
                 row.append(sRNA[seq][n])

@@ -27,16 +27,18 @@ parser.add_argument('-f', '--featurefile', default="genomes/botrytis/BcinereaB05
 args = parser.parse_args()
 
 outsave = os.path.join(args.outdir,"{}.tomato_subtract.tsv.gz".format("Botrytis"))
-outsavebed = os.path.join(args.outdir,"{}.tomato_subtract.bed".format("Botrytis"))
+outsavebedF = os.path.join(args.outdir,"{}.F.tomato_subtract.bed".format("Botrytis"))
+outsavebedR = os.path.join(args.outdir,"{}.R.tomato_subtract.bed".format("Botrytis"))
 
-with gzip.open(args.botrytis, "r") as bc,  gzip.open(args.tomato, "r") as sl, gzip.open(outsave,'w') as outB, open(outsavebed,'w') as outBed:
+with gzip.open(args.botrytis, "r") as bc, gzip.open(args.tomato, "r") as sl, gzip.open(outsave,'w') as outB, open(outsavebedF,'w') as outBedF, open(outsavebedR,'w') as outBedR:
     slreader = csv.reader(io.TextIOWrapper(sl, newline=""),delimiter="\t")
     slheader = next(slreader)
     
     slhits = set()
     
     for row in slreader:
-        name=row[3]
+        name=row[4]
+        
         if name in slhits:
             print("found a non-unique sRNA read {}".format(name))
         else:
@@ -44,7 +46,8 @@ with gzip.open(args.botrytis, "r") as bc,  gzip.open(args.tomato, "r") as sl, gz
 
     bcreader = csv.reader(io.TextIOWrapper(bc, newline=""),delimiter="\t")
     bcwriter = csv.writer(io.TextIOWrapper(outB,newline="", write_through=True),delimiter="\t")
-    bcbed = csv.writer(outBed,delimiter="\t")
+    bcbedF = csv.writer(outBedF,delimiter="\t")
+    bcbedR = csv.writer(outBedR,delimiter="\t")
 
     bcheader = next(bcreader)
     bcwriter.writerow(bcheader)
@@ -52,26 +55,86 @@ with gzip.open(args.botrytis, "r") as bc,  gzip.open(args.tomato, "r") as sl, gz
     id2size = {}
     for row in bcreader:
         name = row[3]
-        if args.skipsingle and int(row[6]) <= 2:
+        if args.skipsingle and int(row[7]) <= 2:
             continue
         if name not in slhits:
             bcwriter.writerow(row)
-            id2size[row[3]] = { 'length': int(row[4]),  # this LENGTH col
+            id2size[row[4]] = { 'length': int(row[4]),  # this LENGTH col
                                 'unique': int(row[5]),  # this is UNIQUE col
                                 'count' : int(row[6]) } # this TOTAL_COUNT column
-            bcbed.writerow([row[0], row[1], row[2], row[3]])
+            if row[4] == "+":
+                bcbedF.writerow([row[0], row[1], row[2], row[3]])
+            else:
+                bcbedR.writerow([row[0], row[1], row[2], row[3]])
 
+
+# forward read matching
 genomefeatures = BedTool(args.featurefile)
-sRNA           = BedTool(outsavebed)
+sRNAF           = BedTool(outsavebedF)
+sRNAR           = BedTool(outsavebedR)
 
 # this would only be reads that overlap we need to also consider those which do not overlap
-readsInFeatures = sRNA.intersect(genomefeatures,wao=True)
+readsInFeaturesF = sRNAF.intersect(genomefeatures,wao=True)
+readsInFeaturesR = sRNAR.intersect(genomefeatures,wao=True)
+
 sizeprofile = {}
+#exonprofile = {'sense': {},
+#                'anti': {}  }
 sizeprofileuniq = {}
 types = set()
-for i in readsInFeatures:
-    seq  = i[3]
 
+# for now I am repeating these routines as I don't quite want to
+# make this generic
+
+for i in readsInFeaturesF:
+    seq  = i[3]
+    strand = i[4]
+    print(i)
+    
+    len    = id2size[seq]['length']
+    unique = id2size[seq]['unique']
+    ct     = id2size[seq]['count']
+
+    type = i[6]
+    TypeClass = "None"
+    if type == "exon":
+        TypeClass = type
+    elif type == "tRNA" or type == "intron":
+        TypeClass = type
+    elif type == 'match': # this is how we coded RepeatMasker results
+        grpcol  = i[12]
+        grp = {}
+        for nm in grpcol.split(";"):
+            (key,val) = nm.split("=")
+            v = val.split('/')[0]
+            grp[key] = "TE.{}".format(v)
+        TypeClass = grp['type'] 
+    elif type == ".":
+        TypeClass = "None"
+    else:
+        continue
+    
+    types.add(TypeClass)
+    if len not in sizeprofile:
+        sizeprofile[len] = {TypeClass: ct}
+    elif TypeClass not in sizeprofile[len]:
+        sizeprofile[len][TypeClass] = ct
+    else:
+        sizeprofile[len][TypeClass] += ct
+        
+    if unique == 1:
+        if len not in sizeprofileuniq:
+            sizeprofileuniq[len] = {TypeClass: ct}
+        elif TypeClass not in sizeprofileuniq[len]:
+            sizeprofileuniq[len][TypeClass] = ct
+        else:
+            sizeprofileuniq[len][TypeClass] += ct
+
+for i in readsInFeaturesR:
+    seq  = i[3]
+    strand = i[4]
+    print(i)
+    
     len    = id2size[seq]['length']
     unique = id2size[seq]['unique']
     ct     = id2size[seq]['count']
@@ -108,7 +171,9 @@ for i in readsInFeatures:
             sizeprofileuniq[len][TypeClass] = ct
         else:
             sizeprofileuniq[len][TypeClass] += ct
-    
+
+
+
 ctheader = ['SIZE']
 ctheader.extend(sorted(list(types)))
 ctheader.append("TOTAL")
