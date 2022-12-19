@@ -68,7 +68,7 @@ pO<-ggplot(sRNA.Other,aes(SIZE,count,fill=FeatureType)) +
 pO
 
 
-pg <- plot_grid(pN, pE, pO, labels = c('NonCoding', 'Coding', "Intergenic"), label_size = 12,ncol = 1,align = "v")
+pg <- plot_grid(pN, pE, pO, labels = c('A', 'B', "C"), label_size = 12,ncol = 1,align = "v")
 ggsave("size_profile_plots.pdf",pg,height=18,width=12)
 
 # pie chart time
@@ -141,7 +141,7 @@ pO<-ggplot(sRNA.Other,aes(SIZE,count,fill=FeatureType)) +
     ggtitle("Botrytis Mycelium Libraries sRNA profile for Non-Genic location")
 pO
 
-pg <- plot_grid(pN, pE, pO, labels = c('NonCoding', 'Coding', "Intergenic"), label_size = 12,ncol = 1,align = "v")
+pg <- plot_grid(pN, pE, pO, labels = c('A', 'B', "C"), label_size = 12,ncol = 1,align = "v")
 ggsave("Bc_Mycelium_size_profile.pdf",pg,height=18,width=12)
 
 # pie chart time
@@ -201,7 +201,7 @@ pO<-ggplot(sRNA.Other,aes(SIZE,count,fill=FeatureType)) +
     ggtitle("Tomato Infection Libraries sRNA profile for Non-Genic location")
 pO
 
-pg <- plot_grid(pN, pE, pO, labels = c('NonCoding', 'Coding', "Intergenic"), label_size = 12,ncol = 1,align = "v")
+pg <- plot_grid(pN, pE, pO, labels = c('A', 'B', "C"), label_size = 12,ncol = 1,align = "v")
 ggsave("Bc_TomatoInfection_size_profile.pdf",pg,height=18,width=12)
 
 # pie chart time
@@ -262,7 +262,7 @@ pO<-ggplot(sRNA.Other,aes(SIZE,count,fill=FeatureType)) +
     ggtitle("Tomato Mock Infection Libraries sRNA profile for Non-Genic location")
 pO
 
-pg <- plot_grid(pN, pE, pO, labels = c('NonCoding', 'Coding', "Intergenic"), label_size = 12,ncol = 1,align = "v")
+pg <- plot_grid(pN, pE, pO, labels = c('A', 'B', "C"), label_size = 12,ncol = 1,align = "v")
 ggsave("Bc_TomatoMock_size_profile.pdf",pg,height=18,width=12)
 
 # pie chart time
