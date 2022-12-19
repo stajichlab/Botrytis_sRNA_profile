@@ -4,22 +4,8 @@ library(tidyverse)
 library(dplyr)
 library(RColorBrewer)
 library(cowplot)
-pdf("size_profile_plots.pdf")
-sRNA.Allsense = read_tsv("results/Botrytis_sense_size_profile.tsv") %>% filter(SIZE >= 18)
-sRNA.Allantisense = read_tsv("results/Botrytis_antisense_size_profile.tsv") %>% filter(SIZE >= 18)
 
-sRNA.sense <- sRNA.Allsense %>% select(-c('TOTAL')) %>% pivot_longer(!SIZE, names_to = "FeatureType", values_to = "count")
-sRNA.noExon <- sRNA.sense %>% filter(FeatureType != 'exon' & FeatureType != "None" & FeatureType != "intron")
-
-negate <- function(x) ( -1.0 * x)
-add_antisense <- function(x) ( paste0(x,".antisense"))
-
-sRNA.antisense <- sRNA.Allantisense %>% select(-c('TOTAL')) %>% pivot_longer(!SIZE, names_to = "FeatureType", values_to = "count") %>%
-    mutate_at(vars(-c("SIZE","FeatureType")),negate) %>% mutate_at(c("FeatureType"),add_antisense)
-sRNA.antinoExon <- sRNA.antisense %>% filter(FeatureType != 'exon.antisense' & FeatureType != "None.antisense" & FeatureType != "intron.antisense")
-
-sRNA.combined <- bind_rows(sRNA.antinoExon,sRNA.noExon) %>% arrange(desc(FeatureType))
-
+# some definitions
 pairedcolors = brewer.pal(12, "Paired")
 green1 = pairedcolors[3]
 green2 = pairedcolors[4]
@@ -46,6 +32,27 @@ piecolors[9] = pairedcolors[9]
 piecolors[10] = pairedcolors[11]
 
 
+negate <- function(x) ( -1.0 * x)
+add_antisense <- function(x) ( paste0(x,".antisense"))
+# setup default plot out
+pdf("Combo_all_plots.pdf")
+
+# read in the "all data"
+sRNA.Allsense = read_tsv("results/Botrytis_sense_size_profile.tsv") %>% filter(SIZE >= 18)
+sRNA.Allantisense = read_tsv("results/Botrytis_antisense_size_profile.tsv") %>% filter(SIZE >= 18)
+
+sRNA.sense <- sRNA.Allsense %>% select(-c('TOTAL')) %>% pivot_longer(!SIZE, names_to = "FeatureType", values_to = "count")
+sRNA.noExon <- sRNA.sense %>% filter(FeatureType != 'exon' & FeatureType != "None" & FeatureType != "intron")
+
+
+sRNA.antisense <- sRNA.Allantisense %>% select(-c('TOTAL')) %>% pivot_longer(!SIZE, names_to = "FeatureType", values_to = "count") %>%
+    mutate_at(vars(-c("SIZE","FeatureType")),negate) %>% mutate_at(c("FeatureType"),add_antisense)
+sRNA.antinoExon <- sRNA.antisense %>% filter(FeatureType != 'exon.antisense' & FeatureType != "None.antisense" & FeatureType != "intron.antisense")
+
+sRNA.combined <- bind_rows(sRNA.antinoExon,sRNA.noExon) %>% arrange(desc(FeatureType))
+
+
+
 pN<-ggplot(sRNA.combined,aes(SIZE,count,fill=FeatureType)) +
     geom_bar(stat='identity',position="stack") + scale_x_discrete(limit = unique(sRNA.combined$SIZE)) +
     theme_cowplot(12) + scale_fill_manual(values = pairedcolors) + ggtitle("Combined all Libraries sRNA profile NonCoding Features")
@@ -69,7 +76,7 @@ pO
 
 
 pg <- plot_grid(pN, pE, pO, labels = c('A', 'B', "C"), label_size = 12,ncol = 1,align = "v")
-ggsave("size_profile_plots.pdf",pg,height=18,width=12)
+ggsave("All_Libraries_size_profile.pdf",pg,height=18,width=12)
 
 # pie chart time
 # make antisense counts, collapse sRNA read length
@@ -85,18 +92,6 @@ sRNA.combinedAll <- bind_rows(sRNA.sense %>% group_by(FeatureType) %>% summarize
 
 Total = sum(sRNA.combinedAll %>% select(countAll))
 
-piecolors = pairedcolors
-piecolors[1] = exonColors[1]
-piecolors[2] = exonColors[2]
-piecolors[3] = exonColors[3]
-piecolors[4] = IntergenicColors[1]
-piecolors[5] = pairedcolors[1]
-piecolors[6] = pairedcolors[3]
-piecolors[7] = pairedcolors[5]
-piecolors[8] = pairedcolors[7]
-piecolors[9] = pairedcolors[9]
-piecolors[10] = pairedcolors[11]
-
 sRNA.combinedAll <- sRNA.combinedAll %>% mutate(Perc=100*(countAll/Total)) # add percentage in
 pie <- ggplot(sRNA.combinedAll, aes(x="", y=countAll, fill=FeatureType)) +
     geom_bar(stat="identity", width=1) + geom_text(aes(label = paste0(sprintf("%.1f",Perc), "%")), position = position_stack(vjust=0.5), size=3) +
@@ -106,7 +101,7 @@ pie <- ggplot(sRNA.combinedAll, aes(x="", y=countAll, fill=FeatureType)) +
                                                                        axis.ticks = element_blank())
 
 pie
-ggsave("sRNA_all_piechart.pdf",pie)
+ggsave("All_Libraries_Piechart.pdf",pie)
 
 ######
 
@@ -128,6 +123,9 @@ pN<-ggplot(sRNA.combined,aes(SIZE,count,fill=FeatureType)) +
     theme_cowplot(12) + scale_fill_manual(values = pairedcolors) + ggtitle("Botrytis Mycelium sRNA profile NonCoding Feature")
 pN
 
+sRNA.Exon <- bind_rows(sRNA.sense %>% filter(FeatureType == 'exon' | FeatureType == "intron"),
+                       sRNA.antisense %>% filter(FeatureType == 'exon.antisense' | FeatureType == "intron.antisense"))
+
 pE<-ggplot(sRNA.Exon,aes(SIZE,count,fill=FeatureType)) +
     geom_bar(stat='identity',position="stack") +
     scale_fill_manual(values = exonColors) +  theme_cowplot(12)  + scale_x_discrete(limit = unique(sRNA.combined$SIZE)) +
@@ -142,7 +140,7 @@ pO<-ggplot(sRNA.Other,aes(SIZE,count,fill=FeatureType)) +
 pO
 
 pg <- plot_grid(pN, pE, pO, labels = c('A', 'B', "C"), label_size = 12,ncol = 1,align = "v")
-ggsave("Bc_Mycelium_size_profile.pdf",pg,height=18,width=12)
+ggsave("Mycelium_size_profile.pdf",pg,height=18,width=12)
 
 # pie chart time
 # make antisense counts, collapse sRNA read length
@@ -167,7 +165,7 @@ pie <- ggplot(sRNA.combinedAll, aes(x="", y=countAll, fill=FeatureType)) +
                                                                        axis.ticks = element_blank())
 
 pie
-ggsave("sRNA_BcMycelium_piechart.pdf",pie,height=8,width=8)
+ggsave("Mycelium_Piechart.pdf",pie,height=8,width=8)
 
 
 ## Infection
@@ -188,6 +186,9 @@ pN<-ggplot(sRNA.combined,aes(SIZE,count,fill=FeatureType)) +
     theme_cowplot(12) + scale_fill_manual(values = pairedcolors) + ggtitle("Tomato Infection sRNA profile NonCoding Feature")
 pN
 
+sRNA.Exon <- bind_rows(sRNA.sense %>% filter(FeatureType == 'exon' | FeatureType == "intron"),
+                       sRNA.antisense %>% filter(FeatureType == 'exon.antisense' | FeatureType == "intron.antisense"))
+
 pE<-ggplot(sRNA.Exon,aes(SIZE,count,fill=FeatureType)) +
     geom_bar(stat='identity',position="stack") +
     scale_fill_manual(values = exonColors) +  theme_cowplot(12)  + scale_x_discrete(limit = unique(sRNA.combined$SIZE)) +
@@ -202,7 +203,7 @@ pO<-ggplot(sRNA.Other,aes(SIZE,count,fill=FeatureType)) +
 pO
 
 pg <- plot_grid(pN, pE, pO, labels = c('A', 'B', "C"), label_size = 12,ncol = 1,align = "v")
-ggsave("Bc_TomatoInfection_size_profile.pdf",pg,height=18,width=12)
+ggsave("TomatoInfection_size_profile.pdf",pg,height=18,width=12)
 
 # pie chart time
 # make antisense counts, collapse sRNA read length
@@ -227,7 +228,7 @@ pie <- ggplot(sRNA.combinedAll, aes(x="", y=countAll, fill=FeatureType)) +
                                                                        axis.ticks = element_blank())
 
 pie
-ggsave("sRNA_TomatoInfection_piechart.pdf",pie,width=8,height=8)
+ggsave("TomatoInfection_Piechart.pdf",pie,width=8,height=8)
 
 
 ####
@@ -263,7 +264,7 @@ pO<-ggplot(sRNA.Other,aes(SIZE,count,fill=FeatureType)) +
 pO
 
 pg <- plot_grid(pN, pE, pO, labels = c('A', 'B', "C"), label_size = 12,ncol = 1,align = "v")
-ggsave("Bc_TomatoMock_size_profile.pdf",pg,height=18,width=12)
+ggsave("MockInfection_size_profile.pdf",pg,height=18,width=12)
 
 # pie chart time
 # make antisense counts, collapse sRNA read length
@@ -288,4 +289,4 @@ pie <- ggplot(sRNA.combinedAll, aes(x="", y=countAll, fill=FeatureType)) +
                                                                        axis.ticks = element_blank())
 
 pie
-ggsave("sRNA_TomatoMock_piechart.pdf",pie,width=8,height=8)
+ggsave("MockInfection_Piechart.pdf",pie,width=8,height=8)
