@@ -45,7 +45,8 @@ outsavebedR = os.path.join(args.outdir, "{}.R.tomato_subtract.bed".format("Botry
 exprnames = set()
 expr_count = {}
 id2size = {}
-TE_other = {'TE.Unknown', 'TE.Simple_repeat', 'TE.Satellite', 'TE.Low_complexity', 'TE.RC', 'TE.SINE'}
+TE_other = {'TE.Unknown', 'TE.Simple_repeat', 'TE.Satellite', 'TE.Low_complexity', 'TE.RC'}
+TE_RNA = {'TE.LTR', 'TE.LINE', 'TE.SINE', 'TE.Retroposon'}
 debugct = 0
 with gzip.open(args.botrytis, "r") as bc,  gzip.open(args.tomato, "r") as sl, gzip.open(outsave, 'w') as outB, open(outsavebedF, 'w') as outBedF, open(outsavebedR, 'w') as outBedR:
     slreader = csv.reader(io.TextIOWrapper(sl, newline=""), delimiter="\t")
@@ -165,8 +166,8 @@ for i in readsInFeaturesF:
             v = val.split('/')[0]
             grp[key] = f"TE.{v}"
         TypeClass = grp['type']
-        if TypeClass in ('TE.Retroposon'):
-            TypeClass = 'TE.LTR'
+        if TypeClass in TE_RNA:
+            TypeClass = 'TE.LTR_Retro_LINE_SINE'
         elif TypeClass in TE_other:
             TypeClass = 'TE.Other'
     else:
@@ -253,8 +254,8 @@ for i in readsInFeaturesR:
             v = val.split('/')[0]
             grp[key] = f"TE.{v}"
         TypeClass = grp['type']
-        if TypeClass in ('TE.Retroposon'):
-            TypeClass = 'TE.LTR'
+        if TypeClass in TE_RNA:
+            TypeClass = 'TE.LTR_Retro_LINE_SINE'
         elif TypeClass in TE_other:
             TypeClass = 'TE.Other'
     else:
