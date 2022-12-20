@@ -11,12 +11,13 @@ green1 = pairedcolors[3]
 green2 = pairedcolors[4]
 pairedcolors[3] = "#FFCC00"
 pairedcolors[4] = "#B15928"
-pairedcolors[11] = green1
-pairedcolors[12] = green2
+pairedcolors[9] = green1
+pairedcolors[10] = green2
 pairedcolors[13] = '#FFFF11'
 pairedcolors[14] = '#AA0011'
 
-exonColors = brewer.pal(4, "Set1")
+exonColors = brewer.pal(6, "Set1")
+exonColors[3] = exonColors[5]
 IntergenicColors = rev(brewer.pal(3,"Greys"))
 
 piecolors = pairedcolors
