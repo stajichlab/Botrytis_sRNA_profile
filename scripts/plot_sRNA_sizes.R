@@ -35,7 +35,7 @@ piecolors[10] = pairedcolors[11]
 negate <- function(x) ( -1.0 * x)
 add_antisense <- function(x) ( paste0(x,".antisense"))
 # setup default plot out
-pdf("Combo_all_plots.pdf")
+pdf("plots/Combo_all_plots.pdf")
 
 # read in the "all data"
 sRNA.Allsense = read_tsv("results/Botrytis_sense_size_profile.tsv") %>% filter(SIZE >= 18)
@@ -76,7 +76,7 @@ pO
 
 
 pg <- plot_grid(pN, pE, pO, labels = c('A', 'B', "C"), label_size = 12,ncol = 1,align = "v")
-ggsave("All_Libraries_size_profile.pdf",pg,height=18,width=12)
+ggsave("plots/All_Libraries_size_profile.pdf",pg,height=18,width=12)
 
 # pie chart time
 # make antisense counts, collapse sRNA read length
@@ -101,7 +101,7 @@ pie <- ggplot(sRNA.combinedAll, aes(x="", y=countAll, fill=FeatureType)) +
                                                                        axis.ticks = element_blank())
 
 pie
-ggsave("All_Libraries_Piechart.pdf",pie)
+ggsave("plots/All_Libraries_Piechart.pdf",pie)
 
 ######
 
@@ -140,7 +140,7 @@ pO<-ggplot(sRNA.Other,aes(SIZE,count,fill=FeatureType)) +
 pO
 
 pg <- plot_grid(pN, pE, pO, labels = c('A', 'B', "C"), label_size = 12,ncol = 1,align = "v")
-ggsave("Mycelium_size_profile.pdf",pg,height=18,width=12)
+ggsave("plots/Mycelium_size_profile.pdf",pg,height=18,width=12)
 
 # pie chart time
 # make antisense counts, collapse sRNA read length
@@ -165,7 +165,7 @@ pie <- ggplot(sRNA.combinedAll, aes(x="", y=countAll, fill=FeatureType)) +
                                                                        axis.ticks = element_blank())
 
 pie
-ggsave("Mycelium_Piechart.pdf",pie,height=8,width=8)
+ggsave("plots/Mycelium_Piechart.pdf",pie,height=8,width=8)
 
 
 ## Infection
@@ -203,7 +203,7 @@ pO<-ggplot(sRNA.Other,aes(SIZE,count,fill=FeatureType)) +
 pO
 
 pg <- plot_grid(pN, pE, pO, labels = c('A', 'B', "C"), label_size = 12,ncol = 1,align = "v")
-ggsave("TomatoInfection_size_profile.pdf",pg,height=18,width=12)
+ggsave("plots/TomatoInfection_size_profile.pdf",pg,height=18,width=12)
 
 # pie chart time
 # make antisense counts, collapse sRNA read length
@@ -228,7 +228,7 @@ pie <- ggplot(sRNA.combinedAll, aes(x="", y=countAll, fill=FeatureType)) +
                                                                        axis.ticks = element_blank())
 
 pie
-ggsave("TomatoInfection_Piechart.pdf",pie,width=8,height=8)
+ggsave("plots/TomatoInfection_Piechart.pdf",pie,width=8,height=8)
 
 
 ####
@@ -264,7 +264,7 @@ pO<-ggplot(sRNA.Other,aes(SIZE,count,fill=FeatureType)) +
 pO
 
 pg <- plot_grid(pN, pE, pO, labels = c('A', 'B', "C"), label_size = 12,ncol = 1,align = "v")
-ggsave("MockInfection_size_profile.pdf",pg,height=18,width=12)
+ggsave("plots/MockInfection_size_profile.pdf",pg,height=18,width=12)
 
 # pie chart time
 # make antisense counts, collapse sRNA read length
@@ -289,4 +289,4 @@ pie <- ggplot(sRNA.combinedAll, aes(x="", y=countAll, fill=FeatureType)) +
                                                                        axis.ticks = element_blank())
 
 pie
-ggsave("MockInfection_Piechart.pdf",pie,width=8,height=8)
+ggsave("plots/MockInfection_Piechart.pdf",pie,width=8,height=8)
