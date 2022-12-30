@@ -16,6 +16,7 @@ pairedcolors[10] = green2
 pairedcolors[13] = '#FFFF11'
 pairedcolors[14] = '#AA0011'
 
+
 exonColors = brewer.pal(6, "Set1")
 exonColors[3] = exonColors[5]
 IntergenicColors = rev(brewer.pal(3,"Greys"))
@@ -32,6 +33,7 @@ piecolors[8] = pairedcolors[7]
 piecolors[9] = pairedcolors[9]
 piecolors[10] = pairedcolors[11]
 
+print(exonColors[3])
 
 negate <- function(x) ( -1.0 * x)
 add_antisense <- function(x) ( paste0(x,".antisense"))

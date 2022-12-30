@@ -32,6 +32,7 @@ piecolors[8] = pairedcolors[7]
 piecolors[9] = pairedcolors[9]
 piecolors[10] = pairedcolors[11]
 
+print(exonColors[3])
 
 negate <- function(x) ( -1.0 * x)
 add_antisense <- function(x) ( paste0(x,".antisense"))
