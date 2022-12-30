@@ -3,6 +3,6 @@
 
 module load biopython
 
-time ./scripts/process_reads_byexp_subtract_Tomato.py
+time ./scripts/process_reads_byexp_subtract_Tomato.py -m 0.0001
 Rscript scripts/plot_sRNA_sizes_uniq.R
 Rscript scripts/plot_sRNA_sizes.R
