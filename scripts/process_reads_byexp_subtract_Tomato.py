@@ -316,7 +316,7 @@ for expr in sizeprofileexpr:
         ctheader.extend(sorted(list(types)))
         ctheader.append("TOTAL")
 
-        with open(os.path.join(args.outdir, f"Botrytis_{desc}_Expr{expr}_size_profile.tsv"), "w") as ofh:
+        with open(os.path.join(args.outdir, f"Botrytis_{desc}_Expr{expr}_size_profile.tsv"), "w", newline="") as ofh:
             bcwriter = csv.writer(ofh, delimiter="\t")
             bcwriter.writerow(ctheader)
 
@@ -341,7 +341,7 @@ for expr in sizeprofileexpr:
                 row.append(sum)
                 bcwriter.writerow(row)
 
-        with open(os.path.join(args.outdir, f"Botrytis_{desc}_Expr{expr}_size_profile_uniq.tsv"), "w") as ofh:
+        with open(os.path.join(args.outdir, f"Botrytis_{desc}_Expr{expr}_size_profile_uniq.tsv"), "w", newline="") as ofh:
             bcwriter = csv.writer(ofh, delimiter="\t")
             bcwriter.writerow(ctheader)
             for size in sorted(sizeprofileexpruniq[expr]):
@@ -367,7 +367,7 @@ for desc in ['sense', 'antisense', 'combined']:
     ctheader.extend(sorted(list(types)))
     ctheader.append("TOTAL")
 
-    with open(os.path.join(args.outdir, f"Botrytis_{desc}_size_profile.tsv"), "w") as ofh:
+    with open(os.path.join(args.outdir, f"Botrytis_{desc}_size_profile.tsv"), "w", newline="") as ofh:
         bcwriter = csv.writer(ofh, delimiter="\t")
         bcwriter.writerow(ctheader)
 
@@ -392,7 +392,7 @@ for desc in ['sense', 'antisense', 'combined']:
             row.append(sum)
             bcwriter.writerow(row)
 
-    with open(os.path.join(args.outdir, f"Botrytis_{desc}_size_profile_uniq.tsv"), "w") as ofh:
+    with open(os.path.join(args.outdir, f"Botrytis_{desc}_size_profile_uniq.tsv"), "w", newline="") as ofh:
         bcwriter = csv.writer(ofh, delimiter="\t")
         bcwriter.writerow(ctheader)
         for size in sorted(sizeprofileuniq):

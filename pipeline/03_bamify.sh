@@ -11,5 +11,5 @@ parallel -j 2 samtools sort -O bam --threads $CPU --write-index -T $SCRATCH/{/.}
 
 parallel -j 2 samtools sort -O bam --threads $CPU --write-index -T $SCRATCH/{/.} -o {.}.bam {} ::: $(ls results_bylib/*/*.sam)
 
-rm -f results_bylib/*/*.sam
-rm -f results/*.sam
+echo rm -f results_bylib/*/*.sam
+echo rm -f results/*.sam

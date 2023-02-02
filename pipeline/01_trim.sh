@@ -3,4 +3,4 @@
 
 module load fastp
 module load parallel
-parallel -j 4 fastp -i {} -o trimmed/{/.}.gz -w 6 -p ::: $(ls input/*.gz)
+parallel -j 4 if \[ ! -f trimmed/{/.}.gz \]\; then fastp -i {} -o trimmed/{/.}.gz -w 6 -p\; fi ::: $(ls input/*.gz)

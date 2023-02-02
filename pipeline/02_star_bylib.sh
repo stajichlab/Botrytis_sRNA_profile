@@ -1,5 +1,5 @@
 #!/usr/bin/bash -l
-#SBATCH -p batch -N 1 -n 1 -c 32 --mem 64gb --out logs/align.%A.log
+#SBATCH -p batch -N 1 -n 1 -c 32 --mem 64gb --out logs/align.%a.log
 module load star
 module load csvkit
 CPU=2
@@ -15,7 +15,9 @@ OUTDIR=results_bylib
 MANIFEST=manifest.tsv
 mkdir -p $OUTDIR
 
-csvgrep -c 2 -r miRNA $SAMPLES | csvcut -c 1,6  | perl -p -e 's/,/_1.fastq.gz\t-\t/; s/^/trimmed\//' | tail -n +2 > $MANIFEST
+if [[ ! -f $MANIEST || $SAMPLES -nt $MANIEST ]]; then
+	csvgrep -c 2 -r miRNA $SAMPLES | csvcut -c 1,5  | perl -p -e 's/,/_1.fastq.gz\t-\t/; s/^/trimmed\//' | tail -n +2 > $MANIFEST
+fi
 cat $MANIFEST | while read FASTQ BLANK LIBRARY
 do
 	mkdir -p $OUTDIR/Tomato

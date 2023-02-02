@@ -11,11 +11,13 @@ tomato=genomes/tomato/GenomeDir
 botrytis=genomes/botrytis/GenomeDir
 SAMPLES=samples.csv
 INDIR=trimmed
-OUTDIR=results_bylib
+OUTDIR=results
 MANIFEST=manifest.tsv
 mkdir -p $OUTDIR
 
-csvgrep -c 2 -r miRNA $SAMPLES | csvcut -c 1,6  | perl -p -e 's/,/_1.fastq.gz\t-\t/; s/^/trimmed\//' | tail -n +2 > $MANIFEST
+if [[ ! -f $MANIEST || $SAMPLES -nt $MANIEST ]]; then
+	csvgrep -c 2 -r miRNA $SAMPLES | csvcut -c 1,5  | perl -p -e 's/,/_1.fastq.gz\t-\t/; s/^/trimmed\//' | tail -n +2 > $MANIFEST
+fi
 
 if [ ! -s $OUTDIR/Tomato_matchLog.final.out ]; then
 	STAR --runThreadN $CPU --genomeDir $tomato --readFilesIn $INDIR --readFilesCommand zcat \
