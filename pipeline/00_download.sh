@@ -1,5 +1,5 @@
 #!/usr/bin/bash -l
-#SBATCH -p short -N 1 -n 16 --mem 8gb --out logs/download_sra.%a.log
+#SBATCH -N 1 -n 1 -c 16 --mem 8gb --out logs/download_sra.%a.log
 
 module load parallel-fastq-dump
 module load workspace/scratch

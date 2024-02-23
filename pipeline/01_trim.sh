@@ -1,5 +1,5 @@
 #!/usr/bin/bash -l
-#SBATCH -p batch -N 1 -c 24 --mem 64gb --out logs/trim.%A.log
+#SBATCH -N 1 -n 1  -c 24 --mem 64gb --out logs/trim.%A.log
 
 module load fastp
 module load parallel

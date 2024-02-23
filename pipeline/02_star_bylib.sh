@@ -1,5 +1,5 @@
 #!/usr/bin/bash -l
-#SBATCH -p batch -N 1 -n 1 -c 32 --mem 64gb --out logs/align.%a.log
+#SBATCH -N 1 -n 1 -c 48 --mem 64gb --out logs/align.%a.log
 module load star
 module load csvkit
 CPU=2
