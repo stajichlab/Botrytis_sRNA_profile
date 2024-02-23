@@ -20,3 +20,9 @@ trimmed/SRR19161653_1.fastq.gz	-	Ku70-1s
 trimmed/SRR19164836_1.fastq.gz	-	M16Bs
 trimmed/SRR19164837_1.fastq.gz	-	M12Bs
 trimmed/SRR23048732_1.fastq.gz	-	M24Ds
+trimmed/Control-1_1.fastq.gz	-	Control1_AGO1IP
+trimmed/Control-2_1.fastq.gz	-	Control2_AGO1IP
+trimmed/Control-3_1.fastq.gz	-	Control3_AGO1IP
+trimmed/Treatment-1_1.fastq.gz	-	Treatment1_AGO1IP
+trimmed/Treatment-2_1.fastq.gz	-	Treatment2_AGO1IP
+trimmed/Treatment-3_1.fastq.gz	-	Treatment3_AGO1IP
