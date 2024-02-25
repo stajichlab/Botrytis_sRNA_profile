@@ -41,3 +41,9 @@ SRR19164836,miRNA-Seq,Solanum lycopersicum,B05.10,M16Bs,Botrytis cinerea-infecte
 SRR19164837,miRNA-Seq,Solanum lycopersicum,B05.10,M12Bs,Botrytis cinerea-infected tomato leaf
 SRR23048700,RNA-Seq,Solanum lycopersicum,B05.10,M24Dm,Botrytis cinerea-infected tomato leaf
 SRR23048732,miRNA-Seq,Solanum lycopersicum,B05.10,M24Ds,Botrytis cinerea-infected tomato leaf
+0-1_S1,miRNA-Seq,Solanum lycopersicum,B05.10,Control-1,AGOIP Control
+0-2_S2,miRNA-Seq,Solanum lycopersicum,B05.10,Control-2,AGOIP Control
+0-3_S3,miRNA-Seq,Solanum lycopersicum,B05.10,Control-3,AGOIP Control
+0-4_S4,miRNA-Seq,Solanum lycopersicum,B05.10,Treatment-1,AGOIP
+0-5_S5,miRNA-Seq,Solanum lycopersicum,B05.10,Treatment-2,AGOIP
+0-6_S6,miRNA-Seq,Solanum lycopersicum,B05.10,Treatment-3,AGOIP
